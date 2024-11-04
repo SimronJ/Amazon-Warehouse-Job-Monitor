@@ -1,0 +1,20 @@
+{
+  "name": "amazon-jobs-monitor",
+  "version": "1.0.0",
+  "description": "Monitor Amazon warehouse job postings in your area",
+  "main": "amazonJobs.js",
+  "scripts": {
+    "start": "node amazonJobs.js"
+  },
+  "keywords": [
+    "amazon",
+    "jobs",
+    "monitor",
+    "automation"
+  ],
+  "author": "YOUR_NAME",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
+}
