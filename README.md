@@ -16,5 +16,5 @@ git clone https://github.com/YOUR_USERNAME/amazon-jobs-monitor
 cd amazon-jobs-monitor
 bash
 npm install
+npm install
 bash
-node amazonJobs.js

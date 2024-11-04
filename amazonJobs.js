@@ -1,3 +1,7 @@
+require('dotenv').config();
+const DiscordNotifier = require('./discordNotifier');
+const discord = new DiscordNotifier(process.env.DISCORD_WEBHOOK_URL);
+
 const BASE_URL = 'https://e5mquma77feepi2bdn4d6h3mpu.appsync-api.us-east-1.amazonaws.com/graphql';
 const SECURITY_TOKEN_BASE = 'https://ebcec29959ba.abf8e894.us-east-1.token.awswaf.com/ebcec29959ba';
 const readline = require('readline');
@@ -110,6 +114,7 @@ async function monitorJobs(coordinates, userInput) {
 
     async function checkJobs() {
         try {
+            await discord.sendStatusUpdate('Checking for new jobs...', 'info');
             console.log(`\n[${timestamp()}] Checking for jobs...`);
             const today = new Date().toISOString().split('T')[0];
             const jobs = await jobSearch.searchSchedules({
@@ -126,17 +131,20 @@ async function monitorJobs(coordinates, userInput) {
             console.log('📋 Current Available Jobs:');
             console.log('='.repeat(50));
             
-            jobs.forEach((job, index) => {
+            for (const job of jobs) {
                 const isNew = !knownJobIds.has(job.jobId.id);
                 if (isNew) {
                     knownJobIds.add(job.jobId.id);
+                    await discord.sendJobNotification(job, true);
+                } else {
+                    await discord.sendJobNotification(job, false);
                 }
                 
                 // Add a "NEW!" label for new jobs
                 const newLabel = isNew ? ' 🆕 NEW!' : '';
                 console.log(`\nJob ${index + 1} of ${jobs.length}${newLabel}`);
                 logNewJob(job);
-            });
+            }
 
             // Clean up old job IDs after 24 hours
             const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
@@ -146,6 +154,7 @@ async function monitorJobs(coordinates, userInput) {
 
         } catch (error) {
             console.error(`[${timestamp()}] ❌ Error:`, error.message);
+            await discord.sendErrorNotification(error);
             if (error.message.includes('token')) {
                 try {
                     console.log(`[${timestamp()}] 🔄 Refreshing security token...`);
