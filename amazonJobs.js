@@ -131,7 +131,7 @@ async function monitorJobs(coordinates, userInput) {
             console.log('📋 Current Available Jobs:');
             console.log('='.repeat(50));
             
-            for (const job of jobs) {
+            for (const [index, job] of jobs.entries()) {
                 const isNew = !knownJobIds.has(job.jobId.id);
                 if (isNew) {
                     knownJobIds.add(job.jobId.id);
@@ -140,9 +140,7 @@ async function monitorJobs(coordinates, userInput) {
                     await discord.sendJobNotification(job, false);
                 }
                 
-                // Add a "NEW!" label for new jobs
-                const newLabel = isNew ? ' 🆕 NEW!' : '';
-                console.log(`\nJob ${index + 1} of ${jobs.length}${newLabel}`);
+                console.log(`\nJob ${index + 1} of ${jobs.length}${isNew ? ' 🆕 NEW!' : ''}`);
                 logNewJob(job);
             }
 
