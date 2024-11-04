@@ -32,30 +32,13 @@ async function getCoordinatesFromZip(zipCode) {
     });
 }
 
-// Get user input for search parameters
-async function getUserInput() {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-
-    const question = (query) => new Promise((resolve) => rl.question(query, resolve));
-
-    try {
-        const zipCode = await question('Enter ZIP code (default: 11001): ');
-        const distance = await question('Enter search radius in miles (default: 50): ');
-        const pageSize = await question('Enter number of jobs to show (default: 5): ');
-
-        rl.close();
-        return {
-            zipCode: zipCode || '11001',
-            distance: parseInt(distance) || 50,
-            pageSize: parseInt(pageSize) || 5
-        };
-    } catch (error) {
-        rl.close();
-        throw error;
-    }
+// Replace getUserInput function with this
+function getSearchParameters() {
+    return {
+        zipCode: process.env.ZIP_CODE || '11001',
+        distance: parseInt(process.env.SEARCH_RADIUS) || 50,
+        pageSize: parseInt(process.env.PAGE_SIZE) || 5
+    };
 }
 
 // Log new job to console
@@ -451,14 +434,14 @@ async function displayJobs() {
     try {
         console.log('Amazon Job Search Monitor\n');
         
-        // Get user input
-        const userInput = await getUserInput();
+        // Get parameters from environment variables
+        const searchParams = getSearchParameters();
         
         // Convert ZIP to coordinates
-        const coordinates = await getCoordinatesFromZip(userInput.zipCode);
+        const coordinates = await getCoordinatesFromZip(searchParams.zipCode);
         
         // Start monitoring
-        const monitor = await monitorJobs(coordinates, userInput);
+        const monitor = await monitorJobs(coordinates, searchParams);
 
         // Handle graceful shutdown
         process.on('SIGINT', () => {
